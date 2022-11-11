@@ -338,6 +338,7 @@ BinarySearchTree<Key, Value>::iterator::operator!=(
     const BinarySearchTree<Key, Value>::iterator& rhs) const
 {
     // TODO
+    //return true if one is true and the other is not
     if(current_ == NULL && rhs.current_ !=NULL){
         return true;
     }
@@ -364,6 +365,7 @@ BinarySearchTree<Key, Value>::iterator::operator++()
     if(current_ ==NULL){
         return *this;
     }
+    //get the left most from the right subtree
     if(current_->getRight() != NULL){
         current_ = current_->getRight();
         while(current_->getLeft() != NULL){
@@ -371,6 +373,7 @@ BinarySearchTree<Key, Value>::iterator::operator++()
         } 
     }
     else{
+        //traverse back up the right subtree
         Node<Key, Value> * temp = current_->getParent();
         while(temp!=NULL && current_==temp->getRight()){
             current_= temp; 
@@ -504,17 +507,21 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
 }
 template<class Key, class Value>
 Node<Key, Value> * BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &keyValuePair, Node<Key, Value> * n, Node<Key, Value> * parent){
+    //create new node if we reach where it goes
     if(n == NULL){
         Node<Key, Value> * newNode = new Node<Key, Value>(keyValuePair.first, keyValuePair.second, parent);
         return newNode;
     }
+    //override key with new value
     else if(n->getKey()==keyValuePair.first){
         n->setValue(keyValuePair.second);
         return n;
     }
+    //smaller keys go on the left
     else if(n->getKey() > keyValuePair.first){
         n->setLeft(insert(keyValuePair, n->getLeft(), n));
     }
+    //bigger keys go on the right
     else{
         n->setRight(insert(keyValuePair, n->getRight(), n));
     }
@@ -537,22 +544,26 @@ Node<Key, Value> * BinarySearchTree<Key, Value>::remove(const Key &key, Node<Key
         n->setRight(remove(key, n->getRight(), n));
     }
     else{
+        //if no children, just delete
         if(n->getRight()==NULL && n->getLeft()==NULL){
             delete n;
             return NULL; 
         }
+        //if only left child, set node to left subtree
         else if(n->getRight()==NULL){
             Node<Key, Value> * temp= n->getLeft();
             temp->setParent(parent);
             delete n;
             return temp;
         }
+        //if only right child, set node to right subtree
         else if(n->getLeft()== NULL){
             Node<Key, Value> * temp = n->getRight();
             temp->setParent(parent);
             delete n;
             return temp;
         }
+        //swap node with predecessor and call remove on left subtree
         else{
             Node<Key, Value> * temp = predecessor(n);
             nodeSwap(n, temp);
@@ -579,6 +590,7 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
     if(current ==NULL){
         return NULL;
     }
+    //get right most of left subtree
     current = current->getLeft();
     while(current->getRight()!=NULL){
         current = current->getRight();
@@ -611,6 +623,7 @@ BinarySearchTree<Key, Value>::getSmallestNode() const
     if(root_==NULL){
         return NULL; 
     }
+    //get left most node
     while(current->getLeft()!= NULL){
         current = current->getLeft();
     }
@@ -655,8 +668,10 @@ int BinarySearchTree<Key, Value>::height(Node<Key, Value> * n) const
     if(n==NULL){
         return 0; 
     }
+    //get height of left and right subtree
     int leftHeight = 1+height(n->getLeft());
     int rightHeight = 1+height(n->getRight());
+    //return larger height
     if(leftHeight>rightHeight){
         return leftHeight;
     } 
@@ -672,12 +687,14 @@ bool BinarySearchTree<Key, Value>::isBalanced(Node<Key, Value> * n) const{
     int leftHeight = height(n->getLeft());
     int rightHeight = height(n->getRight());
     int difference; 
+    //get difference between heights
     if(leftHeight > rightHeight){
         difference = leftHeight - rightHeight; 
     }
     else{
         difference = rightHeight - leftHeight;
     }
+    //balanced if difference is smaller than 2, and same with subtrees
     if(difference<=1 && isBalanced(n->getLeft()) && isBalanced(n->getRight())){
         return true; 
     }
